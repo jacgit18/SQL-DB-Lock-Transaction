@@ -10,7 +10,11 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace WindowsFormsApplication1
-{
+{  // Make a desktop application that maintains the data in the Employee Table.
+    // Make a FILL button to search on a value contained in the Employee Name.
+    // Your application should be able to add, delete and update, and check 
+    // for concurrency.Also, see what happens if you put a Supervisor ID 
+    // that is not in the table(foreign-key reference error).
     public partial class Form1 : Form
     {
         DataTable mytable = new DataTable();
@@ -84,6 +88,9 @@ namespace WindowsFormsApplication1
             //+ " CustomerState = @customerstate, CustomerPostalCode = @customerpostalcode" + " where CustomerID = @customerid";
 
 
+            // going to database for transaction of data
+            // allow user to read data while updating this by default isnt enabled
+            // this is known as isolation level
             mytxn = myconn.BeginTransaction(IsolationLevel.ReadUncommitted);
             SqlCommand updcmd;   
             updcmd = new SqlCommand();
@@ -92,6 +99,10 @@ namespace WindowsFormsApplication1
             updcmd.CommandText = "Update Customer_T set CustomerName = @customername " + "where CustomerID = @customerid and" +
                 " CustomerVersion = @version";
             updcmd.Parameters.Add("@version", SqlDbType.Binary, 50, "CustomerVersion");
+
+            // locking record temporary for changes but locks can be buggy
+
+
             updcmd.Parameters.Add("@customername", SqlDbType.NVarChar, 50,"CustomerName");
             updcmd.Parameters.Add("@customerid", SqlDbType.Int, 50, "CustomerID");
             SqlDataAdapter myadapter = new SqlDataAdapter();
@@ -106,12 +117,17 @@ namespace WindowsFormsApplication1
             myadapter.DeleteCommand = delcmd;
             myadapter.ContinueUpdateOnError = true;
 
+            // changinging data is important take into account if data is link like if you change data of someone in a
+            // insurance database
+            // you wouldnt want update to continue if there are multiple updates being done at same time then system try to update 
+            // the same time you would want it to stop and not continue or but if rows and changes are indepent you would
+            // want updates to continue since they arent related thus you wont get alot of problems 
             try
             {
                 myadapter.Update(mytable);
-                
-
+                // usually done here
                 //mytxn.Commit();
+
             }
             catch (Exception ex)
             {
@@ -126,6 +142,8 @@ namespace WindowsFormsApplication1
 
         private void button4_Click(object sender, EventArgs e)
         {
+            // doing here for testing purposes
+
             mytxn.Commit();
         }
     }
