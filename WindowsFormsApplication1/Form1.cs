@@ -20,6 +20,8 @@ namespace WindowsFormsApplication1
         DataTable mytable = new DataTable();
         SqlConnection myconn = new SqlConnection();
         SqlTransaction mytxn;
+
+
         public Form1()
         {
             InitializeComponent();
@@ -96,8 +98,14 @@ namespace WindowsFormsApplication1
             updcmd = new SqlCommand();
             updcmd.Transaction = mytxn;
             updcmd.Connection = myconn;
-            updcmd.CommandText = "Update Customer_T set CustomerName = @customername " + "where CustomerID = @customerid and" +
-                " CustomerVersion = @version";
+            //updcmd.CommandText = "Update Customer_T set CustomerName = @customername " + "where CustomerID = @customerid and" +
+            //    " CustomerVersion = @version";
+
+            // alternative to above
+            updcmd.CommandText = "GetAllCustomer";
+            updcmd.CommandType = CommandType.StoredProcedure;
+
+
             updcmd.Parameters.Add("@version", SqlDbType.Binary, 50, "CustomerVersion");
 
             // locking record temporary for changes but locks can be buggy
